@@ -5,11 +5,17 @@
     <vendor>noonesthere</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.spring</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.noonesthere.metaannotationsresolver.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <postStartupActivity implementation="com.github.noonesthere.metaannotationsresolver.startup.MyProjectActivity" />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij.spring">
+        <customModuleComponentsDiscoverer
+                implementation="com.github.noonesthere.metaannotationsresolver.discoverer.MetaAnnotationStereotypeDiscoverer"/>
     </extensions>
 </idea-plugin>
