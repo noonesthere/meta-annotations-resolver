@@ -135,6 +135,14 @@ tasks {
         dependsOn(patchChangelog)
     }
 }
+// only for wayland linux
+//tasks.runIde {
+//    jvmArgs = listOf(
+//        "-Dawt.toolkit.name=WLToolkit",
+//        "-Dorg.lwjgl.glfw.libname=wayland",
+//        "-Dide.browser.jcef.enabled=false"
+//    )
+//}
 
 intellijPlatformTesting {
     runIde {
