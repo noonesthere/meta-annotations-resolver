@@ -1,7 +1,6 @@
 package com.github.noonesthere.metaannotationsresolver.discoverer
 
 import com.intellij.openapi.module.Module
-import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
