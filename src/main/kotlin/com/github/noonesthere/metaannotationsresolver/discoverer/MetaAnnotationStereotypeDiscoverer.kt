@@ -1,15 +1,16 @@
 package com.github.noonesthere.metaannotationsresolver.discoverer
 
 import com.intellij.openapi.module.Module
+import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.spring.model.CommonSpringBean
 import com.intellij.spring.model.SpringImplicitBeansProviderBase
+import com.intellij.spring.search.SpringGlobalSearchScopes
 
 //TODO: @IVan use this hardcode string please
 private const val ANNOTATION = "oblik.architecture.UseCase"
@@ -23,20 +24,15 @@ class MetaAnnotationStereotypeDiscoverer : SpringImplicitBeansProviderBase() {
     override fun getImplicitBeans(module: Module): Collection<CommonSpringBean> {
         val cachedValuesManager = CachedValuesManager.getManager(module.project)
         return cachedValuesManager.getCachedValue(module) {
-
-            val scope =
-                GlobalSearchScope.projectScope(module.project)//module.getModuleWithDependenciesAndLibrariesScope(false)
-            val moduleJavas = FilenameIndex.getAllFilesByExt(
-                module.project,
-                "java",
-                scope
-            )
+            val scope = SpringGlobalSearchScopes.runtime(module, this.includeTests())
+            //GlobalSearchScope.projectScope(module.project)//module.getModuleWithDependenciesAndLibrariesScope(false)
+            val moduleJavas = FilenameIndex.getAllFilesByExt(module.project, "java", scope)
 
             val mapperScanClasses = moduleJavas.mapNotNull { virtualFile ->
                 val psiFile = PsiManager.getInstance(module.project).findFile(virtualFile) ?: return@mapNotNull null
                 val originalFile = psiFile.originalElement
-                val psiClass = PsiTreeUtil.getChildOfType(originalFile, PsiClass::class.java)
-                if (psiClass != null && psiClass.hasAnnotation(ANNOTATION)) psiClass else null
+                PsiTreeUtil.getChildOfType(originalFile, PsiClass::class.java)
+                    ?.takeIf { hasStereotype(it.annotations) }
             }
 
             val beans = ArrayList<CommonSpringBean>()
@@ -53,4 +49,8 @@ class MetaAnnotationStereotypeDiscoverer : SpringImplicitBeansProviderBase() {
     }
 
     override fun getProviderName(): String = "MetaAnnotation Bean Provider"
+
+    fun hasStereotype(annotations: Array<PsiAnnotation>): Boolean {
+        return annotations.any { it.qualifiedName in stereotypes }
+    }
 }
